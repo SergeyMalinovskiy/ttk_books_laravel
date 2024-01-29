@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title', 150);
             $table->string('description', 500);
+            $table->boolean('is_hidden')->default(false);
             $table->timestamps();
         });
     }

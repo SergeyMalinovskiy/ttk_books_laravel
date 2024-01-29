@@ -13,6 +13,7 @@ class Category extends Model
     protected $fillable = [
         'title',
         'description',
+        'is_hidden'
     ];
 
     public function books(): BelongsToMany

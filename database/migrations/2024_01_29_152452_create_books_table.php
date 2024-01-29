@@ -17,6 +17,7 @@ return new class extends Migration
             $table->date('published_at');
             $table->string('description', 2000);
             $table->string('cover', 500)->nullable();
+            $table->boolean('is_hidden')->default(false);
             $table->timestamps();
         });
     }
