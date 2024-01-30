@@ -18,7 +18,10 @@ return new class extends Migration
             $table->string('description', 2000);
             $table->string('cover', 500)->nullable();
             $table->boolean('is_hidden')->default(false);
+            $table->bigInteger('owner_id');
             $table->timestamps();
+
+            $table->foreign('owner_id')->references('id')->on('users');
         });
     }
 
