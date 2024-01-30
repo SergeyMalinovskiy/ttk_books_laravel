@@ -15,7 +15,8 @@ class Book extends Model
         'published_at',
         'description',
         'cover',
-        'is_hidden'
+        'is_hidden',
+        'owner_id'
     ];
 
     public function categories(): BelongsToMany

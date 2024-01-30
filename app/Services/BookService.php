@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Author;
 use App\Models\Book;
+use App\Models\Category;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
 use Nette\NotImplementedException;
 
 class BookService
@@ -53,18 +56,82 @@ class BookService
         return Book::query()->findOrFail($id)->toArray();
     }
 
+    /**
+     * @param array $data
+     * @return int
+     *
+     * @throws ModelNotFoundException
+     */
     public function create(array $data): int
     {
-        throw new NotImplementedException();
+
+        $authorIds = array_unique($data['authors']);
+        $categoriesIds = array_unique($data['categories']);
+
+        if (Author::query()->whereIn('id', $authorIds)->count() != count($authorIds)) {
+            throw new ModelNotFoundException("Authors not found!");
+        }
+
+        if (Category::query()->whereIn('id', $categoriesIds)->count() != count($categoriesIds)) {
+            throw new ModelNotFoundException("Categories not found!");
+        }
+
+        $book = new Book([
+            ...$data,
+            'published_at' => Carbon::createFromFormat('d-m-Y', $data['published_at']),
+            'owner_id' => 1 // TODO: пока что так, добавим пользователя как только завезем авторизацию
+        ]);
+
+        $book->save();
+
+        $book->authors()->attach($authorIds);
+        $book->categories()->attach($categoriesIds);
+
+        return $book->id;
     }
 
-    public function update(array $data): bool
+
+    /**
+     * @param int $id
+     * @param array $data
+     * @return array
+     *
+     * @throws ModelNotFoundException
+     */
+    public function update(int $id, array $data): array
     {
-        throw new NotImplementedException();
+        $book = Book::query()->findOrFail($id);
+
+        $authorIds = array_unique($data['authors'] ?? []);
+        $categoriesIds = array_unique($data['categories'] ?? []);
+
+        if ($authorIds && (Author::query()->whereIn('id', $authorIds)->count() != count($authorIds))) {
+            throw new ModelNotFoundException("Authors not found!");
+        }
+
+        if ($categoriesIds && (Category::query()->whereIn('id', $categoriesIds)->count() != count($categoriesIds))) {
+            throw new ModelNotFoundException("Categories not found!");
+        }
+
+        $book->fill($data);
+        $book->save();
+
+        $book->authors()->sync($authorIds);
+        $book->categories()->sync($categoriesIds);
+
+        return [];
     }
 
-    public function delete(int $id): bool
-    {
-        throw new NotImplementedException();
-    }
+//    public function delete(int $id): array
+//    {
+//        $book = Book::query()->findOrFail($id);
+//
+//        if(!$book->exists()) {
+//            return [];
+//        }
+//
+//        $book->delete();
+//
+//        return [];
+//    }
 }
