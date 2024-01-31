@@ -37,4 +37,5 @@ Route::group(['prefix' => 'authors'], function () {
 Route::group(['prefix' => 'categories'], function () {
    Route::post('/', [CategoryController::class, 'create']);
    Route::post('{id}/edit', [CategoryController::class, 'edit']);
+   Route::delete('{id}', [CategoryController::class, 'delete']);
 });
