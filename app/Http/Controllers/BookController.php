@@ -52,7 +52,7 @@ class BookController extends Controller
         );
 
         if ($validator->fails()) {
-            return new JsonResponse($validator->errors(), 400);
+            return new JsonResponse($validator->errors(), Response::HTTP_BAD_REQUEST);
         }
 
         return new JsonResponse(
@@ -79,7 +79,11 @@ class BookController extends Controller
 
         if ($validator->fails() || !$request->all()) {
             $errors = $validator->errors();
-            return new JsonResponse($errors->isEmpty() ? ['Parameters are empty!'] : $errors, 400);
+
+            return new JsonResponse(
+                $errors->isEmpty() ? ['Parameters are empty!'] : $errors,
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         return new JsonResponse($this->bookService->update($id, $request->all()));
