@@ -22,6 +22,7 @@ class BookController extends Controller
     {
         return new JsonResponse(
             $this->bookService->getBooksByAuthorOrTitle(
+                $request->get('page', 1),
                 $request->query->get('author'),
                 $request->query->get('title')
             )

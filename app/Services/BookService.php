@@ -12,14 +12,17 @@ use Nette\NotImplementedException;
 
 class BookService
 {
+    private const PER_PAGE = 5;
+
     /**
      * @param string $author
      * @param string $title
      * @return array<Book>
      */
     public function getBooksByAuthorOrTitle(
+        int $page = 1,
         string $author = null,
-        string $title = null
+        string $title = null,
     ): array
     {
         $query = Book::query();
@@ -42,7 +45,7 @@ class BookService
             });
         }
 
-        return $query->get()->toArray();
+        return $query->paginate(self::PER_PAGE, ['*'], 'page', $page)->items();
     }
 
     /**
