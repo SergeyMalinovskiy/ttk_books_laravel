@@ -2,13 +2,17 @@
 
 namespace App\Services;
 
+use App\Enum\UserRole;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Nette\NotImplementedException;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class BookService
 {
@@ -65,7 +69,7 @@ class BookService
      *
      * @throws ModelNotFoundException
      */
-    public function create(array $data): int
+    public function create(array $data, int $userId): int
     {
 
         $authorIds = array_unique($data['authors']);
@@ -82,7 +86,7 @@ class BookService
         $book = new Book([
             ...$data,
             'published_at' => Carbon::createFromFormat('d-m-Y', $data['published_at']),
-            'owner_id' => 1 // TODO: пока что так, добавим пользователя как только завезем авторизацию
+            'owner_id' => $userId
         ]);
 
         $book->save();
@@ -101,9 +105,22 @@ class BookService
      *
      * @throws ModelNotFoundException
      */
-    public function update(int $id, array $data): array
+    public function update(int $id, array $data, int $userId): array
     {
         $book = Book::query()->findOrFail($id);
+        /**
+         * @var User $currentUser
+         */
+        $currentUser = User::query()->find($userId);
+
+        if (! ($book->owner_id == $userId || $currentUser->role == UserRole::Admin->value)) {
+            return [
+                'data' => [
+                    'message' => 'You`re dont have permission on action!',
+                ],
+                'code' => Response::HTTP_BAD_REQUEST,
+            ];
+        }
 
         $authorIds = array_unique($data['authors'] ?? []);
         $categoriesIds = array_unique($data['categories'] ?? []);
@@ -122,7 +139,7 @@ class BookService
         $book->authors()->sync($authorIds);
         $book->categories()->sync($categoriesIds);
 
-        return [];
+        return ['data' => []];
     }
 
 //    public function delete(int $id): array

@@ -56,7 +56,7 @@ class BookController extends Controller
         }
 
         return new JsonResponse(
-            $this->bookService->create($request->all())
+            $this->bookService->create($request->all(), $request->user()->id)
         );
     }
 
@@ -86,6 +86,8 @@ class BookController extends Controller
             );
         }
 
-        return new JsonResponse($this->bookService->update($id, $request->all()));
+        $result = $this->bookService->update($id, $request->all(), $request->user()->id);
+
+        return new JsonResponse($result['data'], $result['code'] ?? Response::HTTP_OK);
     }
 }

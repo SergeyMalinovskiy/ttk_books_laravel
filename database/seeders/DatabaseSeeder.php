@@ -128,11 +128,13 @@ class DatabaseSeeder extends Seeder
          \App\Models\User::factory()->create([
              'name' => 'test_user',
              'email' => 'test_user@example.com',
+             'role' => 'user'
          ]);
 
         \App\Models\User::factory()->create([
             'name' => 'admin',
             'email' => 'admin@example.com',
+            'role' => 'admin'
         ]);
 
         $categoriesDbInsertResult = array_map(function (array $category) {
